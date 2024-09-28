@@ -4,6 +4,9 @@ import { getParticipants } from "../repository/getParticipants.js";
 import { createSlide } from "../repository/createSlide.js";
 import { changeUserRole } from "../repository/changeUserRole.js";
 import { updateSlidesOrder } from "../repository/updateSlidesOrder.js";
+import type { UpdateCanvasElements } from "../interfaces/CanvasElement.js";
+import { updateCanvasElements } from "../repository/updateCanvasElements.js";
+import { getCanvasElements } from "../repository/getCanvasElements.js";
 
 export interface cretePresentationData {
 	topic: string;
@@ -55,6 +58,26 @@ export const socketServer = async (io: Server) => {
 				await getParticipants(presentationId),
 			);
 		});
+
+		//*Update Canvas Elements
+		socket.on(
+			"updateElements",
+			async ({
+				currentSlide,
+				newElement,
+				presentationId,
+			}: UpdateCanvasElements) => {
+				await updateCanvasElements(currentSlide, newElement, presentationId);
+				const newElements = await getCanvasElements(
+					presentationId,
+					currentSlide,
+				);
+				socket.broadcast.to(presentationId).emit("newElements", {
+					newElements,
+					currentSlide,
+				});
+			},
+		);
 
 		socket.on("disconnect", () => {
 			console.log("Socket disconnected");
