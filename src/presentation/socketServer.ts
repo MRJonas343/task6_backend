@@ -7,6 +7,8 @@ import { updateSlidesOrder } from "../repository/updateSlidesOrder.js";
 import type { UpdateCanvasElements } from "../interfaces/CanvasElement.js";
 import { updateCanvasElements } from "../repository/updateCanvasElements.js";
 import { getCanvasElements } from "../repository/getCanvasElements.js";
+import { deleteCanvasElement } from "../repository/deleteCanvasElement.js";
+import { updateZindex } from "../repository/updateZindex.js";
 
 export interface cretePresentationData {
 	topic: string;
@@ -73,6 +75,38 @@ export const socketServer = async (io: Server) => {
 					currentSlide,
 				);
 				socket.broadcast.to(presentationId).emit("newElements", {
+					newElements,
+					currentSlide,
+				});
+			},
+		);
+
+		//*Delete Canvas Element
+		socket.on(
+			"deleteElement",
+			async ({ presentationId, elementId, slidePosition }) => {
+				await deleteCanvasElement(presentationId, elementId, slidePosition);
+				const newElements = await getCanvasElements(
+					presentationId,
+					slidePosition,
+				);
+				socket.broadcast.to(presentationId).emit("newElements", {
+					newElements,
+					currentSlide: slidePosition,
+				});
+			},
+		);
+
+		//*Update Z index
+		socket.on(
+			"updateZindex",
+			async ({ elements, currentSlide, presentationId }) => {
+				await updateZindex(elements, currentSlide, presentationId);
+				const newElements = await getCanvasElements(
+					presentationId,
+					currentSlide,
+				);
+				socket.broadcast.to(presentationId).emit("updateZindexServer", {
 					newElements,
 					currentSlide,
 				});

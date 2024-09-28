@@ -7,7 +7,6 @@ export const updateSlidesOrder = async (
 	slide2id: string,
 	presentationId: string,
 ) => {
-	console.log(slide1id, slide2id, presentationId);
 	//*I need to update not just the postions, but also the canvas elements and the preview images
 	const [slide1, slide2] = await Promise.all([
 		db
@@ -37,8 +36,6 @@ export const updateSlidesOrder = async (
 				),
 			),
 	]);
-
-	console.log(slide1, slide2);
 
 	//*interchange their positions, canvas elements, and preview images simultaneously
 	await Promise.all([

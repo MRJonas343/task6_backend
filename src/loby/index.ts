@@ -105,7 +105,6 @@ lobyRouter.get(
 				participants: participantsData,
 			});
 		} catch (error) {
-			console.error("Error joining presentation:", error);
 			res.status(500).send({ error: "Failed to join presentation" });
 		}
 	},
