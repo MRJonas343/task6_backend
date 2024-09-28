@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(logger("dev"));
 app.use(
 	cors({
-		origin: "http://localhost:3000",
+		origin: process.env.CORS,
 	}),
 );
 app.get("/", (req, res) => {
@@ -24,7 +24,7 @@ app.use("/loby", lobyRouter);
 const server = createServer(app);
 const io = new Server(server, {
 	cors: {
-		origin: "http://localhost:3000",
+		origin: process.env.CORS,
 	},
 	connectionStateRecovery: {
 		maxDisconnectionDuration: 5000,
