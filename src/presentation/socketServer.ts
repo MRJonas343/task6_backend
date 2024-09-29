@@ -9,6 +9,7 @@ import { updateCanvasElements } from "../repository/updateCanvasElements.js";
 import { getCanvasElements } from "../repository/getCanvasElements.js";
 import { deleteCanvasElement } from "../repository/deleteCanvasElement.js";
 import { updateZindex } from "../repository/updateZindex.js";
+import { getAllSlides } from "../repository/getAllSlides.js";
 
 export interface cretePresentationData {
 	topic: string;
@@ -109,6 +110,21 @@ export const socketServer = async (io: Server) => {
 				socket.broadcast.to(presentationId).emit("updateZindexServer", {
 					newElements,
 					currentSlide,
+				});
+			},
+		);
+
+		//*changeCurrentSlide
+		socket.on(
+			"changeCurrentSlide",
+			async ({ presentationId, slidePosition }) => {
+				const newElements = await getCanvasElements(
+					presentationId,
+					slidePosition,
+				);
+
+				socket.emit("updateFullCanvas", {
+					newElements,
 				});
 			},
 		);

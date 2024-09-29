@@ -4,6 +4,7 @@ import { participants, presentations, slides } from "../db/schemas.js";
 import { and, count, desc, eq } from "drizzle-orm";
 import { updateSlidesOrder } from "../repository/updateSlidesOrder.js";
 import { sql } from "drizzle-orm";
+import { getAllSlides } from "../repository/getAllSlides.js";
 
 const lobyRouter = Router();
 
@@ -217,6 +218,14 @@ lobyRouter.get("/getSlideById", async (req, res) => {
 	const slideDetails = await getSlideById(Number(presentationId));
 
 	res.send(slideDetails[0]); // Retorna el primer (y único) resultado
+});
+
+lobyRouter.get("/getAllSlides", async (req, res) => {
+	const presentationId = req.headers.presentationid;
+
+	const slides = await getAllSlides(Number(presentationId));
+
+	res.send(slides);
 });
 
 export { lobyRouter };
