@@ -6,6 +6,7 @@ export const updateCanvasElements = async (
 	currentSlide: number,
 	newElement: CanvasElement,
 	presentationId: string,
+	image: string,
 ) => {
 	//*Fist I need to get the current elements
 	const currentElements = await db
@@ -27,7 +28,7 @@ export const updateCanvasElements = async (
 		//*Update the db
 		await db
 			.update(slides)
-			.set({ canvasElements: [newElements] })
+			.set({ canvasElements: [newElements], previewImage: image })
 			.where(
 				and(
 					eq(slides.position, currentSlide),
@@ -47,7 +48,7 @@ export const updateCanvasElements = async (
 		//*Update the db
 		await db
 			.update(slides)
-			.set({ canvasElements: newElements })
+			.set({ canvasElements: newElements, previewImage: image })
 			.where(
 				and(
 					eq(slides.position, currentSlide),
@@ -64,7 +65,7 @@ export const updateCanvasElements = async (
 	elements[updatedElementIndex] = newElement;
 	await db
 		.update(slides)
-		.set({ canvasElements: elements })
+		.set({ canvasElements: elements, previewImage: image })
 		.where(
 			and(
 				eq(slides.position, currentSlide),

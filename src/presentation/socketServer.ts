@@ -69,8 +69,14 @@ export const socketServer = async (io: Server) => {
 				currentSlide,
 				newElement,
 				presentationId,
+				image,
 			}: UpdateCanvasElements) => {
-				await updateCanvasElements(currentSlide, newElement, presentationId);
+				await updateCanvasElements(
+					currentSlide,
+					newElement,
+					presentationId,
+					image,
+				);
 				const newElements = await getCanvasElements(
 					presentationId,
 					currentSlide,

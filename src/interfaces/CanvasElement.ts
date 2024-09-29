@@ -22,4 +22,5 @@ export type UpdateCanvasElements = {
 	currentSlide: number;
 	newElement: CanvasElement;
 	presentationId: string;
+	image?: string;
 };
