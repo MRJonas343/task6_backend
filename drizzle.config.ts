@@ -6,10 +6,8 @@ config({ path: ".env" });
 export default defineConfig({
 	schema: "./src/db/schemas.ts",
 	out: "./migrations",
-	dialect: "sqlite",
-	driver: "turso",
+	dialect: "mysql",
 	dbCredentials: {
-		url: process.env.TURSO_CONNECTION_URL ?? "",
-		authToken: process.env.TURSO_AUTH_TOKEN ?? "",
+		url: process.env.DATABASE_URL ?? "",
 	},
 });

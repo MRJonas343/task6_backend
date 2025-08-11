@@ -1,25 +1,24 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { blob } from "drizzle-orm/sqlite-core";
+import { int, mysqlTable, varchar, json, longtext, timestamp } from "drizzle-orm/mysql-core";
 
-export const presentations = sqliteTable("presentations", {
-	id: integer("id").primaryKey(),
-	creator: text("creator"),
-	numberOfSlides: integer("number_of_slides"),
-	createdAt: text("created_at"),
-	topic: text("topic"),
+export const presentations = mysqlTable("presentations", {
+	id: int("id").primaryKey().autoincrement(),
+	creator: varchar("creator", { length: 255 }),
+	numberOfSlides: int("number_of_slides"),
+	createdAt: timestamp("created_at").defaultNow(),
+	topic: varchar("topic", { length: 500 }),
 });
 
-export const participants = sqliteTable("participants", {
-	id: integer("id").primaryKey(),
-	presentationId: integer("presentation_id"),
-	name: text("name"),
-	role: text("role"),
+export const participants = mysqlTable("participants", {
+	id: int("id").primaryKey().autoincrement(),
+	presentationId: int("presentation_id"),
+	name: varchar("name", { length: 255 }),
+	role: varchar("role", { length: 50 }),
 });
 
-export const slides = sqliteTable("slides", {
-	id: integer("id").primaryKey(),
-	presentationId: integer("presentation_id"),
-	position: integer("position"),
-	canvasElements: text("canvas_elements", { mode: "json" }),
-	previewImage: blob("preview_image"),
+export const slides = mysqlTable("slides", {
+	id: int("id").primaryKey().autoincrement(),
+	presentationId: int("presentation_id"),
+	position: int("position"),
+	canvasElements: json("canvas_elements"),
+	previewImage: longtext("preview_image"),
 });

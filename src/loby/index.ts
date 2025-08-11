@@ -14,18 +14,20 @@ lobyRouter.post("/createPresentation", async (req, res) => {
 	const result = await db.insert(presentations).values({
 		creator: requestBody.creator,
 		numberOfSlides: 1,
-		createdAt: new Date().toLocaleString(),
+		createdAt: new Date(),
 		topic: requestBody.topic,
 	});
 
+	const presentationId = Number(result[0].insertId);
+
 	const [result1, result2] = await Promise.all([
 		db.insert(participants).values({
-			presentationId: result.lastInsertRowid,
+			presentationId: presentationId,
 			name: requestBody.creator,
 			role: "creator",
 		}),
 		db.insert(slides).values({
-			presentationId: result.lastInsertRowid,
+			presentationId: presentationId,
 			position: 1,
 			canvasElements: [],
 			previewImage:
@@ -34,16 +36,16 @@ lobyRouter.post("/createPresentation", async (req, res) => {
 	]);
 
 	res.send({
-		presentationId: result.lastInsertRowid.toString(),
+		presentationId: presentationId.toString(),
 		creator: requestBody.creator,
 		role: "creator",
 		topic: requestBody.topic,
 		numberOfSlides: 1,
-		slideId: result2.lastInsertRowid.toString(),
+		slideId: Number(result2[0].insertId).toString(),
 		totalOfSlides: 1,
 		slidesPreviews: [
 			{
-				id: result2.lastInsertRowid.toString(),
+				id: Number(result2[0].insertId).toString(),
 				slidePreview:
 					"https://via.assets.so/img.jpg?w=350&h=150&tc=blue&bg=#000000&t=",
 			},
@@ -143,7 +145,7 @@ lobyRouter.post("/createSlide", async (req, res) => {
 	res.send({
 		presentationId: presentationId,
 		sucessFullyCreated: true,
-		slideId: result.lastInsertRowid.toString(),
+		slideId: Number(result[0].insertId).toString(),
 	});
 });
 
@@ -164,33 +166,33 @@ lobyRouter.get("/slidesGallery", async (req, res) => {
 	async function getSlidesGallery(page: number) {
 		const offset = (page - 1) * 8;
 
-		const slidesPreviews = await db.run(
-			sql`
-				SELECT
-					p.id as presentationId,
-					p.topic,
-					p.creator,
-					(
-						SELECT s.preview_image
-						FROM slides s
-						WHERE s.presentation_id = p.id
-						ORDER BY s.position ASC
-						LIMIT 1
-					) as previewImage,
-					COUNT(participants.id) as numberOfParticipants
-				FROM presentations p
-				LEFT JOIN participants ON participants.presentation_id = p.id
-				GROUP BY p.id
-				LIMIT 8 OFFSET ${offset}
-			`,
-		);
+		const slidesPreviews = await db
+			.select({
+				presentationId: presentations.id,
+				topic: presentations.topic,
+				creator: presentations.creator,
+				previewImage: sql<string>`MIN(${slides.previewImage})`.as("previewImage"),
+				numberOfParticipants: count(participants.id).as("numberOfParticipants"),
+			})
+			.from(presentations)
+			.leftJoin(
+				slides,
+				and(
+					eq(slides.presentationId, presentations.id),
+					eq(slides.position, 1)
+				)
+			)
+			.leftJoin(participants, eq(participants.presentationId, presentations.id))
+			.groupBy(presentations.id, presentations.topic, presentations.creator)
+			.limit(8)
+			.offset(offset);
 
 		return slidesPreviews;
 	}
 
 	const slidesPreviews = await getSlidesGallery(Number(page));
 
-	res.send(slidesPreviews.rows);
+	res.send(slidesPreviews);
 });
 
 lobyRouter.get("/getSlideById", async (req, res) => {
